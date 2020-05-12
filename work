@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Change this to your projects directory.
+PROJDIR="$HOME/Projects"
+
+run () {
+    if [[ -d "$PROJDIR/$1" ]]; then
+        cd $PROJDIR/$1
+        
+        # Run work_step if any.
+        [ -f "bin/activate" ] && source bin/activate && [ -f "work_step" ] && source work_step
+    else
+        printf "\"$1\" does not exist. Create it? (y/N): " && read IN
+        if [[ "$IN" == "y" || "$IN" == "Y" ]]; then
+            mkdir $PROJDIR/$1
+            cd $PROJDIR/$1
+            
+            # Project types and some default routines.
+            printf "Project type (python/c/cpp): " && read IN
+            [ "$IN" == "python" ] && virtualenv . && source bin/activate && source work_step
+            [ "$IN" == "c" ] && touch Makefile && mkdir src && mkdir obj
+            [ "$IN" == "cpp" ] && touch Makefile && mkdir src && mkdir obj
+        fi
+    fi
+    return 0
+}
+[ "$1" == "-l" ] && ls -l $PROJDIR | awk '{print $9}' && return 0
+[ "$1" != "" ] && run $1 || echo "Usage: work [ project | OPTIONS ]\n    OPTIONS:\n        -l : List projects."
